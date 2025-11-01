@@ -2,56 +2,82 @@
 Group Project for OS
 
 
-Week 1 (Nov 1 – 7): CPU Scheduling Algorithms
+Week 1 (Nov 1 – Nov 7): CPU Scheduling
 
-Implement FCFS, SJF (preemptive & non-preemptive), and Round Robin.
+Goal: Make the part that handles how processes are scheduled on the CPU.
 
-Input: number of processes, arrival/burst time, quantum.
+What to do:
 
-Output: waiting time, turnaround time, averages, and Gantt chart.
+Learn/review how FCFS, SJF (preemptive and non-preemptive), and Round Robin work.
 
-✅ Deliverable: Working scheduling module + formatted tables.
+Write a program that:
 
-Week 2 (Nov 8 – 14): Banker’s Algorithm
+Takes the number of processes.
 
-Read process/resource data, allocation, max, and available matrices.
+Asks for arrival time and burst time for each.
 
-Compute Need Matrix and check safe sequence.
+For RR, also asks for the quantum.
 
-Implement request handling and matrix updates.
+Make it calculate:
 
-✅ Deliverable: Fully working Banker’s algorithm with safe state detection.
+Waiting time and turnaround time for each process.
 
-Week 3 (Nov 15 – 21): Page Replacement Algorithms
+Average waiting and turnaround time.
 
-Implement FIFO, Optimal, and LRU.
+Draw a simple Gantt chart showing order of execution.
 
-Input: frame size, reference string.
+Test everything with small examples.
 
-Output: page faults, hit/miss ratios.
+✅ By end of week: All CPU scheduling algorithms working and tested.
 
-✅ Deliverable: Working page replacement module with comparison of results.
+🗓️ Week 2 (Nov 8 – Nov 14): Banker’s Algorithm
 
-Week 4 (Nov 22 – 28): Integration & Documentation
+Goal: Simulate how the system avoids deadlock using resource allocation.
 
-Combine all modules under one main menu.
+What to do:
 
-Clean up input/output and formatting.
+Write a program that:
 
-Write README (compilation/run instructions) and report with screenshots.
+Reads number of processes and resources.
 
-Include all required outputs and sample runs.
+Takes Allocation, Max, and Available matrices as input.
 
-✅ Deliverable: Complete program + polished report ready for review.
+Calculates Need = Max - Allocation.
 
-Week 5 (Nov 29 – Dec 1): Testing & Presentation
+Check if the system is in a safe state (find safe sequence).
 
-Final testing with multiple datasets.
+Ask user for a resource request, and check if it can be granted safely.
 
-Prepare and rehearse project presentation/demo.
+Print updated matrices if request is accepted.
 
-Submit source code, report, README, screenshots by Dec 1 (no zip files).
+✅ By end of week: Banker's algorithm working with safe sequence and request check.
 
-Bring hard copy for in-class presentation.
+🗓️ Week 3 (Nov 15 – Nov 21): Page Replacement
 
-✅ Deliverable: Fully functional project submitted and presented.
+Goal: Simulate how memory handles pages (what stays, what gets replaced).
+
+What to do:
+
+Write three algorithms:
+
+FIFO, Optimal, LRU.
+
+Take frame size and reference string as input.
+
+For each algorithm:
+
+Show page replacements as they happen.
+
+Count page faults, hits, and misses.
+
+Show final hit/miss ratios.
+
+✅ By end of week: All three page replacement algorithms tested and results compared.
+
+🗓️ Week 4 (Nov 22 – Nov 28): Combine & Report
+
+Goal: Put everything together and write your report.
+
+What to do:
+
+Make a main menu like:
