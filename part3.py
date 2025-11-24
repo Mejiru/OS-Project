@@ -128,7 +128,7 @@ def run():
             print(row)
         print()
 
-    reference = list(map(int, input("Enter reference string (space-separated): ").split()))
+    reference = list(map(int, input("Please enter the reference string separated by space: ").split()))
     frame_size = int(input("Enter frame size: "))
 
     print("\nReference:", reference)
