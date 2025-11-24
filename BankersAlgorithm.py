@@ -7,6 +7,36 @@ class BankersAlgorithm:
         self.allocation = []
         self.need = []
     
+    def run(self):
+        print("=== Banker's Algorithm ===")
+        self.input_data()
+        self.display_matrices()
+        
+        is_safe, sequence = self.is_safe_state()
+        if is_safe:
+            print(f"\nSystem is in safe state")
+            print(f"Safe sequence: {sequence}")
+        else:
+            print(f"\nSystem is in unsafe state")
+        
+        while True:
+            request_choice = input("\nMake resource request? (y/n): ").lower()
+            if request_choice != 'y':
+                break
+            
+            process_id = int(input("Enter process ID: "))
+            request = [int(x) for x in input("Enter request vector: ").split()]
+            
+            success, message = self.request_resources(process_id, request)
+            print(f"Result: {message}")
+            
+            if success:
+                is_safe, sequence = self.is_safe_state()
+                if is_safe:
+                    print(f"System remains in safe state")
+                    print(f"New safe sequence: {sequence}")
+                self.display_matrices()
+    
     def input_data(self):
         self.num_processes = int(input("Enter number of processes: "))
         self.num_resources = int(input("Enter number of resource types: "))
@@ -26,7 +56,6 @@ class BankersAlgorithm:
             row = [int(x) for x in input(f"Process {i}: ").split()]
             self.allocation.append(row)
         
-        # Calculate Need Matrix
         self.calculate_need()
     
     def calculate_need(self):
@@ -46,7 +75,6 @@ class BankersAlgorithm:
             found = False
             for i in range(self.num_processes):
                 if not finish[i]:
-                    # Check if need[i] <= work
                     can_allocate = True
                     for j in range(self.num_resources):
                         if self.need[i][j] > work[j]:
@@ -54,7 +82,6 @@ class BankersAlgorithm:
                             break
                     
                     if can_allocate:
-                        # Simulate resource allocation
                         for j in range(self.num_resources):
                             work[j] += self.allocation[i][j]
                         finish[i] = True
@@ -62,22 +89,19 @@ class BankersAlgorithm:
                         found = True
             
             if not found:
-                return False, []  # Unsafe state
+                return False, []
         
         return True, safe_sequence
     
     def request_resources(self, process_id, request):
-        # Check if request <= need
         for j in range(self.num_resources):
             if request[j] > self.need[process_id][j]:
                 return False, "Error: Request exceeds maximum claim"
         
-        # Check if request <= available
         for j in range(self.num_resources):
             if request[j] > self.available[j]:
                 return False, "Error: Resources not available"
         
-        # Try to allocate resources temporarily
         old_available = self.available.copy()
         old_allocation = [row.copy() for row in self.allocation]
         old_need = [row.copy() for row in self.need]
@@ -87,11 +111,9 @@ class BankersAlgorithm:
             self.allocation[process_id][j] += request[j]
             self.need[process_id][j] -= request[j]
         
-        # Check if system is in safe state
         is_safe, sequence = self.is_safe_state()
         
         if not is_safe:
-            # Revert changes
             self.available = old_available
             self.allocation = old_allocation
             self.need = old_need
