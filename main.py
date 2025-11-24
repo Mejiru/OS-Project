@@ -4,14 +4,15 @@ import part3
 def show_menu():
     while True:
         print("          OS Simulator         ")
-        print("[1] Banker's Algorithm")
-        print("[2] Page Replacement Algorithms (Part 3)")
-        print("[3] Another Algorithm (placeholder)")
+        print("=" * 30)
+        print("[1] Hatem's Part")
+        print("[2] Banker's Algorithm")
+        print("[3] Page Replacement Algorithms")
         print("[0] Exit")
-        print("="*30)
+
         choice = input("Enter your choice: ").strip()
         if choice == "1":
-          print("\n--- Option 3 selected (placeholder) ---")
+          print("\nHatem's part")
           input("\nPress Enter to return to the menu...")
         elif choice == "2":
             print("\n--- Banker's Algorithm ---")
@@ -28,5 +29,6 @@ def show_menu():
         else:
             print("\nInvalid input, try again.")
             input("Press Enter...")
+
 if __name__ == "__main__":
     show_menu()
