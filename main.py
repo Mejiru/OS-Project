@@ -15,8 +15,8 @@ def show_menu():
           print("\nHatem's part")
           input("\nPress Enter to return to the menu...")
         elif choice == "2":
-            print("\n--- Banker's Algorithm ---")
-            BankersAlgorithm.run()
+            algo = BankersAlgorithm.BankersAlgorithm()
+            algo.run()
             input("\nPress Enter to return to the menu...")
         elif choice == "3":
             print("\n--- Page Replacement Algorithms (Part 3) ---")
