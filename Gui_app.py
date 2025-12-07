@@ -10,10 +10,10 @@ class OSSimulatorGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("OS Simulator Project")
-        self.root.geometry("1200x800")
+        self.root.geometry("1200x850") 
         self.root.configure(bg="#f0f0f0")
         
-        
+     
         self.selected_algorithm = tk.StringVar(value="First Come First Serve, FCFS")
         self.arrival_times = tk.StringVar()
         self.burst_times = tk.StringVar()
@@ -21,7 +21,13 @@ class OSSimulatorGUI:
         self.reference_string = tk.StringVar()
         self.frame_size = tk.StringVar()
         
+       
         self.banker_resources = tk.StringVar() 
+        self.request_process_id = tk.StringVar()
+        self.request_vector = tk.StringVar()
+        
+       
+        self.banker_instance = None 
         
         self.setup_ui()
     
@@ -30,13 +36,13 @@ class OSSimulatorGUI:
         main_frame = tk.Frame(self.root, bg="#f0f0f0", padx=20, pady=20)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
-     
+       
         input_frame = tk.Frame(main_frame, bg="white", relief=tk.RAISED, bd=2)
         input_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
         
         tk.Label(input_frame, text="Configuration", font=("Arial", 16, "bold"), bg="white").pack(pady=(20, 15))
         
-        
+       
         tk.Label(input_frame, text="Select Algorithm:", font=("Arial", 11, "bold"), bg="white", anchor="w").pack(fill=tk.X, padx=20)
         self.algo_combo = ttk.Combobox(input_frame, textvariable=self.selected_algorithm, state="readonly", width=30)
         self.algo_combo['values'] = (
@@ -52,11 +58,11 @@ class OSSimulatorGUI:
         self.algo_combo.pack(fill=tk.X, padx=20, pady=(5, 20))
         self.algo_combo.bind("<<ComboboxSelected>>", self.on_algorithm_change)
         
-      
+       
         self.dynamic_frame = tk.Frame(input_frame, bg="white")
         self.dynamic_frame.pack(fill=tk.BOTH, expand=True, padx=20)
         
-        
+       
         self.cpu_frame = tk.Frame(self.dynamic_frame, bg="white")
         tk.Label(self.cpu_frame, text="Arrival Times (space separated):", bg="white", anchor="w").pack(fill=tk.X)
         self.entry_arrival = tk.Entry(self.cpu_frame, textvariable=self.arrival_times)
@@ -71,7 +77,6 @@ class OSSimulatorGUI:
         self.lbl_quantum = tk.Label(self.cpu_frame, text="Quantum (Round Robin only):", bg="white", anchor="w")
         self.entry_quantum = tk.Entry(self.cpu_frame, textvariable=self.quantum)
         
-        
         self.mem_frame = tk.Frame(self.dynamic_frame, bg="white")
         tk.Label(self.mem_frame, text="Reference String (space separated):", bg="white", anchor="w").pack(fill=tk.X)
         tk.Entry(self.mem_frame, textvariable=self.reference_string).pack(fill=tk.X, pady=(0, 10))
@@ -79,10 +84,9 @@ class OSSimulatorGUI:
         tk.Label(self.mem_frame, text="Frame Size (integer):", bg="white", anchor="w").pack(fill=tk.X)
         tk.Entry(self.mem_frame, textvariable=self.frame_size).pack(fill=tk.X, pady=(0, 10))
 
-       
+        
         self.banker_frame = tk.Frame(self.dynamic_frame, bg="white")
         
-       
         tk.Label(self.banker_frame, text="Available Resources Vector (Resource Types determined by length):", font=("Arial", 10, "bold"), bg="white", anchor="w").pack(fill=tk.X)
         tk.Label(self.banker_frame, text="Example (3 resource types): 3 3 2", font=("Arial", 8), fg="gray", bg="white", anchor="w").pack(fill=tk.X)
         self.entry_banker_resources = tk.Entry(self.banker_frame, textvariable=self.banker_resources)
@@ -96,13 +100,25 @@ class OSSimulatorGUI:
         tk.Label(self.banker_frame, text="Max Matrix (Must have same number of rows as Allocation):", font=("Arial", 10, "bold"), bg="white", anchor="w").pack(fill=tk.X)
         self.text_banker_max = scrolledtext.ScrolledText(self.banker_frame, height=4, width=30)
         self.text_banker_max.pack(fill=tk.X, pady=(0, 10))
+
        
+        self.request_frame = tk.LabelFrame(self.banker_frame, text="Resource Request Simulation (Run SOLVE first)", bg="white", padx=10, pady=10)
+        
+        tk.Label(self.request_frame, text="Process ID (e.g., 0, 1, 2...):", bg="white", anchor="w").pack(fill=tk.X, pady=(5, 0))
+        tk.Entry(self.request_frame, textvariable=self.request_process_id).pack(fill=tk.X, pady=(0, 5))
+
+        tk.Label(self.request_frame, text="Request Vector (e.g., 1 0 1):", bg="white", anchor="w").pack(fill=tk.X, pady=(5, 0))
+        tk.Entry(self.request_frame, textvariable=self.request_vector).pack(fill=tk.X, pady=(0, 10))
+
+        tk.Button(self.request_frame, text="MAKE REQUEST", font=("Arial", 10, "bold"), bg="#ffc107", fg="black", 
+                 command=self.make_banker_request, relief=tk.FLAT, pady=5).pack(fill=tk.X)
+      
 
        
         btn_frame = tk.Frame(input_frame, bg="white")
         btn_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=20)
         
-        tk.Button(btn_frame, text="SOLVE", font=("Arial", 12, "bold"), bg="#007bff", fg="white", 
+        tk.Button(btn_frame, text="SOLVE INITIAL STATE", font=("Arial", 12, "bold"), bg="#007bff", fg="white", 
                  command=self.solve, relief=tk.FLAT, pady=10).pack(fill=tk.X, pady=(0, 10))
                  
         tk.Button(btn_frame, text="RESET", font=("Arial", 12), bg="#6c757d", fg="white", 
@@ -117,20 +133,23 @@ class OSSimulatorGUI:
         self.output_text = scrolledtext.ScrolledText(output_frame, font=("Consolas", 10), state=tk.DISABLED, padx=10, pady=10)
         self.output_text.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
         
-      
+        
         self.on_algorithm_change()
 
     def on_algorithm_change(self, event=None):
+        
         algo = self.selected_algorithm.get()
         
-        
+       
         self.cpu_frame.pack_forget()
         self.mem_frame.pack_forget()
         self.banker_frame.pack_forget()
         self.lbl_quantum.pack_forget()
         self.entry_quantum.pack_forget()
+        self.request_frame.pack_forget()
+        self.banker_instance = None 
         
-       
+      
         if "FCFS" in algo or "SJF" in algo or "SRTF" in algo or "Round Robin" in algo:
             self.cpu_frame.pack(fill=tk.BOTH, expand=True)
             if "Round Robin" in algo:
@@ -143,10 +162,12 @@ class OSSimulatorGUI:
         elif "Banker" in algo:
             self.banker_frame.pack(fill=tk.BOTH, expand=True)
 
-    def write_output(self, text):
+
+    def write_output(self, text, append=False):
         self.output_text.config(state=tk.NORMAL)
-        self.output_text.delete("1.0", tk.END)
-        self.output_text.insert("1.0", text)
+        if not append:
+            self.output_text.delete("1.0", tk.END)
+        self.output_text.insert(tk.END, text)
         self.output_text.config(state=tk.DISABLED)
 
     def solve(self):
@@ -162,7 +183,7 @@ class OSSimulatorGUI:
             self.write_output(f"Error occurred:\n{str(e)}\n\nPlease check your inputs.")
 
     def solve_cpu(self, algo):
-        
+        # ... (CPU scheduling logic remains the same) ...
         arr_str = self.arrival_times.get().strip() or "0"
         burst_str = self.burst_times.get().strip()
         
@@ -233,7 +254,7 @@ class OSSimulatorGUI:
         self.write_output(output)
 
     def solve_memory(self, algo):
-        
+       
         ref_str = self.reference_string.get()
         frame_str = self.frame_size.get()
         
@@ -258,7 +279,7 @@ class OSSimulatorGUI:
         self.write_output(buffer.getvalue())
 
     def solve_banker(self):
-        
+       
         avail_str = self.banker_resources.get().strip()
         alloc_str = self.text_banker_alloc.get('1.0', tk.END).strip()
         max_str = self.text_banker_max.get('1.0', tk.END).strip()
@@ -267,55 +288,44 @@ class OSSimulatorGUI:
             messagebox.showwarning("Input Error", "Please fill all Banker's Algorithm fields.")
             return
 
-        
-        ba = BankersAlgorithm.BankersAlgorithm()
-        
-        
-        ba.available = list(map(int, avail_str.split()))
-        ba.num_resources = len(ba.available)
-        
-       
-        alloc_str = alloc_str.replace('\n', ';')
-        rows_alloc = [r.strip() for r in alloc_str.split(';') if r.strip()]
+     
+        self.banker_instance = BankersAlgorithm.BankersAlgorithm()
+        ba = self.banker_instance 
         
         try:
-            ba.allocation = [list(map(int, r.split())) for r in rows_alloc]
-        except ValueError:
-             raise ValueError("Allocation Matrix contains non-integer or poorly formatted values.")
-             
-        ba.num_processes = len(ba.allocation)
-        
-       
-        max_str = max_str.replace('\n', ';')
-        rows_max = [r.strip() for r in max_str.split(';') if r.strip()]
-
-        try:
-            ba.max_demand = [list(map(int, r.split())) for r in rows_max]
-        except ValueError:
-            raise ValueError("Max Matrix contains non-integer or poorly formatted values.")
-
-        
-       
-        if len(ba.max_demand) != ba.num_processes:
-            raise ValueError(f"Max Matrix rows ({len(ba.max_demand)}) must match Allocation Matrix rows ({ba.num_processes}).")
-        if any(len(row) != ba.num_resources for row in ba.allocation):
-            raise ValueError("All Allocation rows must match number of resources defined by the Available vector.")
-        if any(len(row) != ba.num_resources for row in ba.max_demand):
-            raise ValueError("All Max rows must match number of resources defined by the Available vector.")
+           
+            ba.available = list(map(int, avail_str.split()))
+            ba.num_resources = len(ba.available)
             
-       
-        ba.calculate_need()
+          
+            alloc_str = alloc_str.replace('\n', ';')
+            rows_alloc = [r.strip() for r in alloc_str.split(';') if r.strip()]
+            ba.allocation = [list(map(int, r.split())) for r in rows_alloc]
+            ba.num_processes = len(ba.allocation)
+            
+          
+            max_str = max_str.replace('\n', ';')
+            rows_max = [r.strip() for r in max_str.split(';') if r.strip()]
+            ba.max_demand = [list(map(int, r.split())) for r in rows_max]
+
+        except ValueError:
+             raise ValueError("Matrix data contains non-integer or poorly formatted values.")
         
       
+        if len(ba.max_demand) != ba.num_processes:
+            raise ValueError(f"Max Matrix rows ({len(ba.max_demand)}) must match Allocation Matrix rows ({ba.num_processes}).")
+        if any(len(row) != ba.num_resources for row in ba.allocation) or \
+           any(len(row) != ba.num_resources for row in ba.max_demand):
+            raise ValueError("All matrix rows must match the number of resources defined by the Available vector.")
+        
+        ba.calculate_need()
         is_safe, sequence = ba.is_safe_state()
         
        
-        output = "=== Banker's Algorithm Results ===\n\n"
-      
+        output = "=== Banker's Algorithm Initial State Results ===\n\n"
         output += f"Calculated Resource Types (m): {ba.num_resources}\n"
         output += f"Calculated Number of Processes (n): {ba.num_processes}\n"
         output += "-"*40 + "\n\n"
-        # ------------------------------------
         
         output += "Current System State:\n"
         output += f"Available Resources: {ba.available}\n\n"
@@ -327,25 +337,79 @@ class OSSimulatorGUI:
         
         if is_safe:
             output += "RESULT: System is in a SAFE STATE. ✅\n"
-            output += f"Safe Sequence: <{', '.join([f'P{i}' for i in sequence])}>"
+            output += f"Safe Sequence: <{', '.join([f'P{i}' for i in sequence])}>\n"
         else:
             output += "RESULT: System is in an UNSAFE STATE. ❌\n"
-            output += "Deadlock is possible."
-            
+            output += "Deadlock is possible.\n"
+        
         self.write_output(output)
+        
+       
+        self.request_frame.pack(fill=tk.X, padx=10, pady=(15, 0))
+        self.request_frame.config(text=f"Resource Request Simulation (Processes 0 to {ba.num_processes - 1})")
+
+
+    def make_banker_request(self):
+        if not self.banker_instance:
+            messagebox.showerror("Error", "Please run 'SOLVE INITIAL STATE' first.")
+            return
+
+        try:
+            pid = int(self.request_process_id.get().strip())
+            request = list(map(int, self.request_vector.get().strip().split()))
+        except ValueError:
+            messagebox.showerror("Input Error", "Invalid Process ID or Request Vector format.")
+            return
+
+        ba = self.banker_instance
+        
+       
+        if not (0 <= pid < ba.num_processes):
+            messagebox.showerror("Input Error", f"Process ID must be between 0 and {ba.num_processes - 1}.")
+            return
+        if len(request) != ba.num_resources:
+            messagebox.showerror("Input Error", f"Request vector must have {ba.num_resources} resource values.")
+            return
+
+       
+        success, message = ba.request_resources(pid, request)
+
+        request_output = f"\n\n=== Resource Request: P{pid} requests {request} ===\n"
+        request_output += f"Result: {message}\n"
+        
+        if success:
+            request_output += "Request granted. System state updated.\n"
+            is_safe, sequence = ba.is_safe_state()
+            request_output += f"New Available Resources: {ba.available}\n"
+            request_output += f"System remains in SAFE STATE. ✅\n"
+            request_output += f"New Safe Sequence: <{', '.join([f'P{i}' for i in sequence])}>\n"
+        else:
+            request_output += "Request denied. System state remains unchanged.\n"
+            
+        self.write_output(request_output, append=True)
+       
+        self.request_process_id.set("")
+        self.request_vector.set("")
+
 
     def reset(self):
-      
+     
         self.arrival_times.set("0 2 4 6 8")
         self.burst_times.set("2 4 6 8 10")
         self.quantum.set("")
         self.reference_string.set("")
         self.frame_size.set("")
         self.banker_resources.set("")
+        self.request_process_id.set("")
+        self.request_vector.set("")
         
-        
+     
         self.text_banker_alloc.delete('1.0', tk.END)
         self.text_banker_max.delete('1.0', tk.END)
+        
+        
+        self.request_frame.pack_forget()
+        self.banker_instance = None
         
         self.write_output("Ready.")
 
