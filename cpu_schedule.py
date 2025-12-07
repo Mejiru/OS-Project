@@ -181,9 +181,7 @@ def round_robin(processes, quantum):
     return gantt
 
 # ---------------- Main Function ----------------
-def main():
-    print("CPU Scheduling Simulator")
-
+def get_process_input():
     n = int(input("Enter number of processes: "))
     procs = []
     for i in range(n):
@@ -191,36 +189,102 @@ def main():
         at = int(input(f"Arrival time for {pid} (default 0): ") or 0)
         bt = int(input(f"Burst time for {pid}: "))
         procs.append(Process(pid, at, bt))
+    return procs
 
-    quantum = int(input("Enter quantum for Round Robin: "))
+def show_algorithm_menu():
+    print("\n" + "=" * 50)
+    print("          CPU Scheduling Algorithms          ")
+    print("=" * 50)
+    print("[1] First Come First Serve (FCFS)")
+    print("[2] Shortest Job First - Non-Preemptive (SJF)")
+    print("[3] Shortest Remaining Time First - Preemptive (SRTF)")
+    print("[4] Round Robin (RR)")
+    print("[0] Return to Main Menu")
+    print("=" * 50)
 
-    # FCFS
-    print("\n===== FCFS =====")
+def run_algorithm(algorithm_choice, procs, quantum=None):
     reset(procs)
-    g = fcfs(procs)
-    print_table(procs)
-    print_gantt(g)
+    
+    if algorithm_choice == "1":
+        print("\n" + "=" * 50)
+        print("          First Come First Serve (FCFS)          ")
+        print("=" * 50)
+        g = fcfs(procs)
+        print_table(procs)
+        print_gantt(g)
+        
+    elif algorithm_choice == "2":
+        print("\n" + "=" * 50)
+        print("     Shortest Job First - Non-Preemptive (SJF)     ")
+        print("=" * 50)
+        g = sjf_non_preemptive(procs)
+        print_table(procs)
+        print_gantt(g)
+        
+    elif algorithm_choice == "3":
+        print("\n" + "=" * 50)
+        print("  Shortest Remaining Time First - Preemptive (SRTF)  ")
+        print("=" * 50)
+        g = sjf_preemptive(procs)
+        print_table(procs)
+        print_gantt(g)
+        
+    elif algorithm_choice == "4":
+        if quantum is None:
+            quantum = int(input("Enter quantum for Round Robin: "))
+        print("\n" + "=" * 50)
+        print("          Round Robin (RR)          ")
+        print("=" * 50)
+        g = round_robin(procs, quantum)
+        print_table(procs)
+        print_gantt(g)
 
-    # SJF Non-preemptive
-    print("\n===== SJF (Non-Preemptive) =====")
-    reset(procs)
-    g = sjf_non_preemptive(procs)
-    print_table(procs)
-    print_gantt(g)
-
-    # SRTF
-    print("\n===== SJF (Preemptive - SRTF) =====")
-    reset(procs)
-    g = sjf_preemptive(procs)
-    print_table(procs)
-    print_gantt(g)
-
-    # Round Robin
-    print("\n===== ROUND ROBIN =====")
-    reset(procs)
-    g = round_robin(procs, quantum)
-    print_table(procs)
-    print_gantt(g)
+def main():
+    print("\n" + "=" * 50)
+    print("          CPU Scheduling Simulator          ")
+    print("=" * 50)
+    
+    procs = get_process_input()
+    quantum = None
+    
+    while True:
+        show_algorithm_menu()
+        choice = input("Select an algorithm: ").strip()
+        
+        if choice == "0":
+            print("\nReturning to main menu...")
+            break
+            
+        elif choice in ["1", "2", "3", "4"]:
+            if choice == "4" and quantum is None:
+                quantum = int(input("Enter quantum for Round Robin: "))
+            
+            run_algorithm(choice, procs, quantum)
+            
+            print("\n" + "=" * 50)
+            print("Options:")
+            print("[1] Try Another Algorithm")
+            print("[2] Reset & Enter New Processes")
+            print("[0] Return to Main Menu")
+            print("=" * 50)
+            
+            next_action = input("Choose an option: ").strip()
+            
+            if next_action == "1":
+                continue
+            elif next_action == "2":
+                procs = get_process_input()
+                quantum = None
+                continue
+            elif next_action == "0":
+                print("\nReturning to main menu...")
+                break
+            else:
+                print("\nInvalid option. Returning to algorithm menu...")
+                continue
+        else:
+            print("\nInvalid choice. Please try again.")
+            input("Press Enter to continue...")
 
 def run():
     main()
