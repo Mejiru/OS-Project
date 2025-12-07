@@ -26,17 +26,17 @@ class OSSimulatorGUI:
         self.setup_ui()
     
     def setup_ui(self):
-        
+       
         main_frame = tk.Frame(self.root, bg="#f0f0f0", padx=20, pady=20)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
-       
+     
         input_frame = tk.Frame(main_frame, bg="white", relief=tk.RAISED, bd=2)
         input_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
         
         tk.Label(input_frame, text="Configuration", font=("Arial", 16, "bold"), bg="white").pack(pady=(20, 15))
         
-       
+        
         tk.Label(input_frame, text="Select Algorithm:", font=("Arial", 11, "bold"), bg="white", anchor="w").pack(fill=tk.X, padx=20)
         self.algo_combo = ttk.Combobox(input_frame, textvariable=self.selected_algorithm, state="readonly", width=30)
         self.algo_combo['values'] = (
@@ -52,7 +52,7 @@ class OSSimulatorGUI:
         self.algo_combo.pack(fill=tk.X, padx=20, pady=(5, 20))
         self.algo_combo.bind("<<ComboboxSelected>>", self.on_algorithm_change)
         
-        
+      
         self.dynamic_frame = tk.Frame(input_frame, bg="white")
         self.dynamic_frame.pack(fill=tk.BOTH, expand=True, padx=20)
         
@@ -71,7 +71,7 @@ class OSSimulatorGUI:
         self.lbl_quantum = tk.Label(self.cpu_frame, text="Quantum (Round Robin only):", bg="white", anchor="w")
         self.entry_quantum = tk.Entry(self.cpu_frame, textvariable=self.quantum)
         
-       
+        
         self.mem_frame = tk.Frame(self.dynamic_frame, bg="white")
         tk.Label(self.mem_frame, text="Reference String (space separated):", bg="white", anchor="w").pack(fill=tk.X)
         tk.Entry(self.mem_frame, textvariable=self.reference_string).pack(fill=tk.X, pady=(0, 10))
@@ -82,19 +82,21 @@ class OSSimulatorGUI:
        
         self.banker_frame = tk.Frame(self.dynamic_frame, bg="white")
         
-        tk.Label(self.banker_frame, text="Available Resources Vector (e.g., 3 3 2):", bg="white", anchor="w").pack(fill=tk.X)
+       
+        tk.Label(self.banker_frame, text="Available Resources Vector (Resource Types determined by length):", font=("Arial", 10, "bold"), bg="white", anchor="w").pack(fill=tk.X)
+        tk.Label(self.banker_frame, text="Example (3 resource types): 3 3 2", font=("Arial", 8), fg="gray", bg="white", anchor="w").pack(fill=tk.X)
         self.entry_banker_resources = tk.Entry(self.banker_frame, textvariable=self.banker_resources)
         self.entry_banker_resources.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Label(self.banker_frame, text="Allocation Matrix (Row by row, use ';' for new line):", bg="white", anchor="w").pack(fill=tk.X)
-        tk.Label(self.banker_frame, text="Example: 0 1 0; 2 0 0; 3 0 2; 2 1 1", font=("Arial", 8), fg="gray", bg="white", anchor="w").pack(fill=tk.X)
+        tk.Label(self.banker_frame, text="Allocation Matrix (Processes determined by rows/lines):", font=("Arial", 10, "bold"), bg="white", anchor="w").pack(fill=tk.X)
+        tk.Label(self.banker_frame, text="Enter each process on a new line or separate by ';'", font=("Arial", 8), fg="gray", bg="white", anchor="w").pack(fill=tk.X)
         self.text_banker_alloc = scrolledtext.ScrolledText(self.banker_frame, height=4, width=30)
         self.text_banker_alloc.pack(fill=tk.X, pady=(0, 10))
         
-        tk.Label(self.banker_frame, text="Max Matrix (Row by row, use ';' for new line):", bg="white", anchor="w").pack(fill=tk.X)
-        tk.Label(self.banker_frame, text="Example: 7 5 3; 3 2 2; 9 0 2; 2 2 2", font=("Arial", 8), fg="gray", bg="white", anchor="w").pack(fill=tk.X)
+        tk.Label(self.banker_frame, text="Max Matrix (Must have same number of rows as Allocation):", font=("Arial", 10, "bold"), bg="white", anchor="w").pack(fill=tk.X)
         self.text_banker_max = scrolledtext.ScrolledText(self.banker_frame, height=4, width=30)
         self.text_banker_max.pack(fill=tk.X, pady=(0, 10))
+       
 
        
         btn_frame = tk.Frame(input_frame, bg="white")
@@ -106,7 +108,7 @@ class OSSimulatorGUI:
         tk.Button(btn_frame, text="RESET", font=("Arial", 12), bg="#6c757d", fg="white", 
                  command=self.reset, relief=tk.FLAT, pady=5).pack(fill=tk.X)
 
-       
+      
         output_frame = tk.Frame(main_frame, bg="white", relief=tk.RAISED, bd=2)
         output_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         
@@ -115,7 +117,7 @@ class OSSimulatorGUI:
         self.output_text = scrolledtext.ScrolledText(output_frame, font=("Consolas", 10), state=tk.DISABLED, padx=10, pady=10)
         self.output_text.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
         
-        
+      
         self.on_algorithm_change()
 
     def on_algorithm_change(self, event=None):
@@ -128,7 +130,7 @@ class OSSimulatorGUI:
         self.lbl_quantum.pack_forget()
         self.entry_quantum.pack_forget()
         
-        
+       
         if "FCFS" in algo or "SJF" in algo or "SRTF" in algo or "Round Robin" in algo:
             self.cpu_frame.pack(fill=tk.BOTH, expand=True)
             if "Round Robin" in algo:
@@ -258,10 +260,8 @@ class OSSimulatorGUI:
     def solve_banker(self):
         
         avail_str = self.banker_resources.get().strip()
-        
         alloc_str = self.text_banker_alloc.get('1.0', tk.END).strip()
         max_str = self.text_banker_max.get('1.0', tk.END).strip()
-        
         
         if not avail_str or not alloc_str or not max_str:
             messagebox.showwarning("Input Error", "Please fill all Banker's Algorithm fields.")
@@ -270,36 +270,56 @@ class OSSimulatorGUI:
         
         ba = BankersAlgorithm.BankersAlgorithm()
         
-      
+        
         ba.available = list(map(int, avail_str.split()))
         ba.num_resources = len(ba.available)
         
        
         alloc_str = alloc_str.replace('\n', ';')
         rows_alloc = [r.strip() for r in alloc_str.split(';') if r.strip()]
-        ba.allocation = [list(map(int, r.split())) for r in rows_alloc]
+        
+        try:
+            ba.allocation = [list(map(int, r.split())) for r in rows_alloc]
+        except ValueError:
+             raise ValueError("Allocation Matrix contains non-integer or poorly formatted values.")
+             
         ba.num_processes = len(ba.allocation)
         
        
         max_str = max_str.replace('\n', ';')
         rows_max = [r.strip() for r in max_str.split(';') if r.strip()]
-        ba.max_demand = [list(map(int, r.split())) for r in rows_max]
+
+        try:
+            ba.max_demand = [list(map(int, r.split())) for r in rows_max]
+        except ValueError:
+            raise ValueError("Max Matrix contains non-integer or poorly formatted values.")
+
         
        
         if len(ba.max_demand) != ba.num_processes:
             raise ValueError(f"Max Matrix rows ({len(ba.max_demand)}) must match Allocation Matrix rows ({ba.num_processes}).")
         if any(len(row) != ba.num_resources for row in ba.allocation):
-            raise ValueError("All Allocation rows must match number of resources.")
+            raise ValueError("All Allocation rows must match number of resources defined by the Available vector.")
+        if any(len(row) != ba.num_resources for row in ba.max_demand):
+            raise ValueError("All Max rows must match number of resources defined by the Available vector.")
             
        
         ba.calculate_need()
         
-       
+      
         is_safe, sequence = ba.is_safe_state()
         
        
         output = "=== Banker's Algorithm Results ===\n\n"
+      
+        output += f"Calculated Resource Types (m): {ba.num_resources}\n"
+        output += f"Calculated Number of Processes (n): {ba.num_processes}\n"
+        output += "-"*40 + "\n\n"
+        # ------------------------------------
         
+        output += "Current System State:\n"
+        output += f"Available Resources: {ba.available}\n\n"
+
         output += "Calculated Need Matrix (Max - Allocation):\n"
         for i, row in enumerate(ba.need):
             output += f"P{i}: {row}\n"
@@ -315,7 +335,7 @@ class OSSimulatorGUI:
         self.write_output(output)
 
     def reset(self):
-       
+      
         self.arrival_times.set("0 2 4 6 8")
         self.burst_times.set("2 4 6 8 10")
         self.quantum.set("")
@@ -323,7 +343,7 @@ class OSSimulatorGUI:
         self.frame_size.set("")
         self.banker_resources.set("")
         
-       
+        
         self.text_banker_alloc.delete('1.0', tk.END)
         self.text_banker_max.delete('1.0', tk.END)
         
